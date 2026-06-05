@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>動態人員計數器（Safari 最佳化版）</title>
+    <title>動態人員計數器（含繳費功能）</title>
     <style>
         * {
             box-sizing: border-box;
@@ -70,7 +70,7 @@
         }
         /* 名字按鈕樣式 - 針對 Safari 指尖觸控優化 */
         .name-btn {
-            -webkit-appearance: none; /* 移除 iOS 預設按鈕外觀 */
+            -webkit-appearance: none;
             flex: 1;
             padding: 14px 10px; /* 加大垂直點擊範圍 */
             font-size: 18px;
@@ -96,10 +96,37 @@
             font-size: 26px; /* 放大數字，更清晰 */
             font-weight: 700;
             color: #2c3e50;
-            width: 70px; /* 固定寬度，防止數字從個位數變十位數時排版跳動 */
+            width: 60px; /* 固定寬度，防止數字變動時排版跳動 */
             text-align: center;
             font-variant-numeric: tabular-nums; /* 讓每個數字寬度一致，對齊更好看 */
         }
+
+        /* 💰 繳費按鈕樣式 - 預設紅色（未繳費） */
+        .pay-btn {
+            -webkit-appearance: none;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #ef4444; /* 紅色 */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px; /* 與旁邊的重置按鈕拉開距離 */
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+            touch-action: manipulation;
+        }
+        /* 💰 已繳費狀態 - 綠色 */
+        .pay-btn.paid {
+            background-color: #10b981; /* 綠色 */
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+        }
+
         /* 重置按鈕樣式 */
         .reset-btn {
             -webkit-appearance: none;
@@ -121,7 +148,7 @@
 
 <div class="container">
     <h2>人員點擊計數器</h2>
-    <div class="subtitle">點擊名字按鈕即可讓點數 +1</div>
+    <div class="subtitle">點擊名字點數 +1 ｜ 點擊 $ 切換繳費狀態</div>
     
     <button class="action-btn" id="import-btn">📱 點此輸入人員名單</button>
     
@@ -146,17 +173,22 @@
             const row = document.createElement('div');
             row.className = 'person-row';
 
-            // 名字按鈕
+            // 1. 名字按鈕
             const button = document.createElement('button');
             button.className = 'name-btn';
             button.innerText = name;
 
-            // 數字顯示
+            // 2. 數字顯示
             const countSpan = document.createElement('span');
             countSpan.className = 'counter';
             countSpan.innerText = '0';
 
-            // 重置按鈕
+            // 3. 繳費按鈕 ($)
+            const payBtn = document.createElement('button');
+            payBtn.className = 'pay-btn';
+            payBtn.innerText = '$';
+
+            // 4. 重置按鈕
             const resetBtn = document.createElement('button');
             resetBtn.className = 'reset-btn';
             resetBtn.innerText = '重置';
@@ -167,6 +199,12 @@
                 countSpan.innerText = currentCount + 1;
             });
 
+            // 點擊 $ 切換紅/綠色狀態
+            payBtn.addEventListener('click', () => {
+                // toggle 會自動判斷：如果沒有 paid 類別就加上(變綠)，有的話就移除(變回紅)
+                payBtn.classList.toggle('paid');
+            });
+
             // 點擊重置歸零
             resetBtn.addEventListener('click', () => {
                 if(confirm(`確定要將 ${name} 的計數歸零嗎？`)) {
@@ -174,8 +212,10 @@
                 }
             });
 
+            // 依序塞入網頁行內
             row.appendChild(button);
             row.appendChild(countSpan);
+            row.appendChild(payBtn);
             row.appendChild(resetBtn);
             buttonListContainer.appendChild(row);
         });
